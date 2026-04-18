@@ -1,25 +1,37 @@
-name: wa_tools_pro
-description: All-in-one WhatsApp Tools App
-publish_to: 'none'
-version: 1.0.0+1
+name: Build WA Tools Pro APK
 
-environment:
-  sdk: '>=3.0.0 <4.0.0'
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
 
-dependencies:
-  flutter:
-    sdk: flutter
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-  url_launcher: ^6.2.2
-  shared_preferences: ^2.2.2
-  photo_manager: ^3.0.0
-  permission_handler: ^11.3.0
-  cupertino_icons: ^1.0.2
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
-  flutter_lints: ^3.0.0
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.16.9'
 
-flutter:
-  uses-material-design: true
+      - name: Clean project
+        run: flutter clean
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Fix Android setup
+        run: flutter create . --platforms android
+
+      - name: Build APK
+        run: flutter build apk --release --no-tree-shake-icons
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: wa-tools-pro-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
